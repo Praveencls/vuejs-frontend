@@ -1,0 +1,25 @@
+trigger:
+  - master
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - group: AIcommerce_group # <-- replace
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '18.x'
+
+  - script: |
+      npm install
+      npm run build
+    displayName: 'Install and Build'
+
+  - task: AzureStaticWebApp@0
+    inputs:
+      app_location: '/'
+      output_location: 'dist'
+      skip_app_build: true
+      azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN)
