@@ -21,6 +21,7 @@
     "vue-router": "^5.0.3"
   },
   "devDependencies": {
+    "@azure/static-web-apps-cli": "^2.0.8",
     "@tsconfig/node24": "^24.0.4",
     "@types/node": "^24.10.13",
     "@vitejs/plugin-vue": "^6.0.4",
