@@ -1,0 +1,33 @@
+trigger:
+  - master
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - group: AIcommerce_group # Must contain AZURE_STATIC_WEB_APPS_API_TOKEN
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '22.x'
+    displayName: 'Use Node 22'
+
+  - script: npm ci
+    displayName: 'Install Dependencies'
+
+  - script: npm run build
+    displayName: 'Build App'
+
+  - script: |
+      echo "Listing dist folder..."
+      ls -la dist
+    displayName: 'Debug dist'
+
+  - task: AzureStaticWebApp@0
+    displayName: 'Deploy to Azure Static Web App'
+    inputs:
+      app_location: 'dist' # 🔥 SAME AS GITHUB WORKFLOW
+      output_location: '' # 🔥 MUST BE EMPTY
+      skip_app_build: true # 🔥 IMPORTANT
+      azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN)
