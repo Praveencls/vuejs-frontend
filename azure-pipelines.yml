@@ -1,25 +1,25 @@
 trigger:
-  - master # change to main if your default branch is main
+  - master
 
 pool:
   vmImage: ubuntu-latest
 
 variables:
-  - group:
-      AIcommerce_group # must contain:
-      # AZURE_STATIC_WEB_APPS_API_TOKEN
-      # VITE_API_BASE_URL
+  - group: AIcommerce_group
 
 steps:
   - task: NodeTool@0
     inputs:
       versionSpec: '22.x'
-    displayName: 'Use Node 18'
 
-  # 🔥 Inject Vite production environment variable
   - script: |
       echo "VITE_API_BASE_URL=$(VITE_API_BASE_URL)" > .env.production
-    displayName: 'Create .env.production'
+
+  - script: |
+      rm -rf staticwebapp.config.json
+      rm -rf public/staticwebapp.config.json
+      rm -rf dist/staticwebapp.config.json
+    displayName: 'Remove any static web app config'
 
   - script: |
       npm ci
@@ -31,4 +31,5 @@ steps:
       app_location: '/'
       output_location: 'dist'
       skip_app_build: true
+      config_file_location: ''
       azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN)
