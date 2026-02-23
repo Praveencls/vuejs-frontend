@@ -6,7 +6,7 @@ const message = ref('')
 
 onMounted(async () => {
   try {
-    const res = await api.get('/hello') // Spring Boot endpoint1
+    const res = await api.get('/hello') // Spring Boot endpoint2
     message.value = res.data
   } catch (err) {
     console.error(err)
