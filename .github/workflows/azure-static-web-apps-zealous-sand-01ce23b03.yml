@@ -27,6 +27,12 @@ jobs:
           find . -type f -name "routes.json"
           echo "Listing root directory..."
           ls -la
+      - name: Debug dist folder
+        run: |
+          echo "Listing dist folder..."
+          ls -la dist
+          echo "Searching inside dist..."
+          find dist -type f -name "staticwebapp.config.json"
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
