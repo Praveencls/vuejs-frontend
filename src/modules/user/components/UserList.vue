@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getUsers, type UserResponse } from '@/api/userService'
+import { getUsers, type UserResponse } from '@/modules/user/services/userService'
 
 const users = ref<UserResponse[]>([])
 

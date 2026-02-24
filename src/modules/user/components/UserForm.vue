@@ -25,7 +25,7 @@
 <script setup lang="ts">
 import { AxiosError } from 'axios'
 import { reactive, ref } from 'vue'
-import { createUser, type UserRequest } from '@/api/userService'
+import { createUser, type UserRequest } from '@/modules/user/services/userService'
 
 const emit = defineEmits<{
   (e: 'userCreated'): void
