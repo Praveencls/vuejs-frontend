@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2>User Management</h2>
+    <h2>User Management By Page Dev</h2>
 
     <UserForm @userCreated="refreshList" />
 
