@@ -27,13 +27,16 @@ stages:
 
                 $org = "$(organization)"
                 $project = "$(project)"
-                $iteration = "$(iterationPath)"
-                $area = "$(areaPath)"
+
+                $area = "AIEcommerce"
+                $iteration = "AIEcommerce\Sprint 1"
+
+                $pat = "$(System.AccessToken)"
+                $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$pat"))
 
                 $headers = @{
-                    Authorization = "Bearer $(System.AccessToken)"
+                    Authorization = "Basic $base64AuthInfo"
                     "Content-Type" = "application/json-patch+json"
-                    Accept = "application/json; api-version=7.0"
                 }
 
                 function Create-WorkItem {
@@ -80,9 +83,14 @@ stages:
                         }
                     }
 
-                    $json = $body | ConvertTo-Json -Depth 100 -Compress
+                    $json = $body | ConvertTo-Json -Depth 100
 
-                    $url = "$org/$project/_apis/wit/workitems/`$$type?api-version=7.0"
+                    # ✅ FIXED URL CONSTRUCTION
+                    $workItemType = [System.Uri]::EscapeDataString('$' + $type)
+                    $url = "$org/$project/_apis/wit/workitems/$workItemType?api-version=7.0"
+
+                    Write-Host "Creating Work Item Type: $type"
+                    Write-Host "URL: $url"
 
                     $response = Invoke-RestMethod `
                         -Uri $url `
@@ -93,63 +101,11 @@ stages:
                     return $response.id
                 }
 
-                function Link-Parent {
-                    param (
-                        [int]$childId,
-                        [int]$parentId
-                    )
-
-                    $body = @(
-                        @{
-                            op = "add"
-                            path = "/relations/-"
-                            value = @{
-                                rel = "System.LinkTypes.Hierarchy-Reverse"
-                                url = "$org/_apis/wit/workItems/$parentId"
-                            }
-                        }
-                    ) | ConvertTo-Json -Depth 100 -Compress
-
-                    $url = "$org/$project/_apis/wit/workitems/$childId?api-version=7.0"
-
-                    Invoke-RestMethod `
-                        -Uri $url `
-                        -Method Patch `
-                        -Headers $headers `
-                        -Body $body
-                }
-
                 Write-Host "Creating Epic..."
+                $epicId = Create-WorkItem -type "Epic" -title "E-Commerce Checkout" -description "Checkout Implementation" -storyPoints 0
 
-                $epicId = Create-WorkItem "Epic" `
-                    "Vue3 Ecommerce Frontend Foundation" `
-                    "Epic covering routing, modules and ecommerce architecture." `
-                    0
+                Write-Host "Creating Product Backlog Item..."
+                $pbiId = Create-WorkItem -type "Product Backlog Item" -title "Build Checkout UI" -description "Frontend checkout work" -storyPoints 8
 
-                Write-Host "Epic Created: $epicId"
-
-                # PBI 1
-                $pbi1 = Create-WorkItem "Product Backlog Item" `
-                    "Implement Modular Vue Routing" `
-                    "Setup scalable Vue router with lazy loading and guards." `
-                    5
-
-                Link-Parent $pbi1 $epicId
-
-                Create-WorkItem "Task" "Refactor router structure" "" 0 | ForEach-Object { Link-Parent $_ $pbi1 }
-                Create-WorkItem "Task" "Implement lazy loading" "" 0 | ForEach-Object { Link-Parent $_ $pbi1 }
-                Create-WorkItem "Task" "Add route guards" "" 0 | ForEach-Object { Link-Parent $_ $pbi1 }
-
-                # PBI 2
-                $pbi2 = Create-WorkItem "Product Backlog Item" `
-                    "Create Product Module Structure" `
-                    "Add product module with components and routes." `
-                    5
-
-                Link-Parent $pbi2 $epicId
-
-                Create-WorkItem "Task" "Create product folder structure" "" 0 | ForEach-Object { Link-Parent $_ $pbi2 }
-                Create-WorkItem "Task" "Implement ProductList view" "" 0 | ForEach-Object { Link-Parent $_ $pbi2 }
-                Create-WorkItem "Task" "Create productService.ts" "" 0 | ForEach-Object { Link-Parent $_ $pbi2 }
-
-                Write-Host "Sprint Setup Completed Successfully"
+                Write-Host "Creating Task..."
+                Create-WorkItem -type "Task" -title "Create Address Component" -description "Vue component" -storyPoints 0
