@@ -33,6 +33,7 @@ stages:
                 $headers = @{
                     Authorization = "Bearer $(System.AccessToken)"
                     "Content-Type" = "application/json-patch+json"
+                    Accept = "application/json; api-version=7.0"
                 }
 
                 function Create-WorkItem {
