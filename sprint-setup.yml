@@ -6,8 +6,8 @@ pool:
 variables:
   organization: 'https://dev.azure.com/praveencls'
   project: 'AIEcommerce'
-  iterationPath: 'AIEcommerce\Sprint 1'
   areaPath: 'AIEcommerce'
+  iterationPath: 'AIEcommerce\Sprint 1'
 
 stages:
   - stage: SetupSprint
@@ -20,16 +20,15 @@ stages:
             persistCredentials: true
 
           - task: PowerShell@2
-            displayName: 'Create Epic, PBIs and Tasks'
+            displayName: 'Create Epic, PBI and Task with Linking'
             inputs:
               targetType: 'inline'
               script: |
 
                 $org = "$(organization)"
                 $project = "$(project)"
-
-                $area = "AIEcommerce"
-                $iteration = "AIEcommerce\Sprint 1"
+                $area = "$(areaPath)"
+                $iteration = "$(iterationPath)"
 
                 $pat = "$(System.AccessToken)"
                 $base64AuthInfo = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$pat"))
@@ -44,7 +43,8 @@ stages:
                         [string]$type,
                         [string]$title,
                         [string]$description,
-                        [int]$storyPoints
+                        [int]$storyPoints,
+                        [int]$parentId
                     )
 
                     $body = @()
@@ -83,13 +83,24 @@ stages:
                         }
                     }
 
-                    $json = $body | ConvertTo-Json -Depth 100
+                    # Add Parent link if provided
+                    if ($parentId -gt 0) {
+                        $body += @{
+                            op = "add"
+                            path = "/relations/-"
+                            value = @{
+                                rel = "System.LinkTypes.Hierarchy-Reverse"
+                                url = "$org/$project/_apis/wit/workItems/$parentId"
+                            }
+                        }
+                    }
 
-                    # ✅ FIXED URL CONSTRUCTION
-                    $workItemType = [System.Uri]::EscapeDataString('$' + $type)
+                    $json = $body | ConvertTo-Json -Depth 10
+
+                    $workItemType = '$' + $type
                     $url = "$org/$project/_apis/wit/workitems/$workItemType?api-version=7.0"
 
-                    Write-Host "Creating Work Item Type: $type"
+                    Write-Host "Creating $type : $title"
                     Write-Host "URL: $url"
 
                     $response = Invoke-RestMethod `
@@ -102,10 +113,33 @@ stages:
                 }
 
                 Write-Host "Creating Epic..."
-                $epicId = Create-WorkItem -type "Epic" -title "E-Commerce Checkout" -description "Checkout Implementation" -storyPoints 0
+                $epicId = Create-WorkItem `
+                    -type "Epic" `
+                    -title "E-Commerce Checkout" `
+                    -description "Checkout Implementation" `
+                    -storyPoints 0 `
+                    -parentId 0
+
+                Write-Host "Epic Created: $epicId"
 
                 Write-Host "Creating Product Backlog Item..."
-                $pbiId = Create-WorkItem -type "Product Backlog Item" -title "Build Checkout UI" -description "Frontend checkout work" -storyPoints 8
+                $pbiId = Create-WorkItem `
+                    -type "Product Backlog Item" `
+                    -title "Build Checkout UI" `
+                    -description "Frontend checkout implementation" `
+                    -storyPoints 8 `
+                    -parentId $epicId
+
+                Write-Host "PBI Created: $pbiId"
 
                 Write-Host "Creating Task..."
-                Create-WorkItem -type "Task" -title "Create Address Component" -description "Vue component" -storyPoints 0
+                $taskId = Create-WorkItem `
+                    -type "Task" `
+                    -title "Create Address Component" `
+                    -description "Vue 3 Address Component" `
+                    -storyPoints 0 `
+                    -parentId $pbiId
+
+                Write-Host "Task Created: $taskId"
+
+                Write-Host "All Work Items Created Successfully!"
