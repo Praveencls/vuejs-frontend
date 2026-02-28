@@ -98,7 +98,7 @@ stages:
                     $json = $body | ConvertTo-Json -Depth 10
 
                     $workItemType = '$' + $type
-                    $url = "$org/$project/_apis/wit/workitems/$workItemType?api-version=7.0"
+                    $url = "https://dev.azure.com/praveencls/AIEcommerce/_apis/wit/workitems/$Epic?api-version=7.0"
 
                     Write-Host "Creating $type : $title"
                     Write-Host "URL: $url"
