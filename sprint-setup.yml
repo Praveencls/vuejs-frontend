@@ -76,11 +76,16 @@ stages:
 
                     $url = "$org/$project/_apis/wit/workitems/`$$type?api-version=7.0"
 
+                    $headers = @{
+                        Authorization = "Bearer $(System.AccessToken)"
+                        "Content-Type" = "application/json-patch+json"
+                        Accept = "application/json;api-version=7.0"
+                    }
+
                     $response = Invoke-RestMethod -Uri $url `
                         -Method Patch `
-                        -ContentType "application/json-patch+json" `
-                        -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)} `
-                        -Body $json
+                        -Headers $headers `
+                        -Body $body
 
                     return $response.id
                 }
