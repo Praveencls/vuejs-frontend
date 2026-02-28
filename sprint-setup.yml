@@ -110,7 +110,7 @@ stages:
                         }
                     ) | ConvertTo-Json -Depth 100 -Compress
 
-                    $url = "$org/$project/_apis/wit/workitems/`$($type)?api-version=7.0"
+                    $url = "$org/$project/_apis/wit/workitems/$childId?api-version=7.0"
 
                     Invoke-RestMethod `
                         -Uri $url `
