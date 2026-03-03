@@ -6,6 +6,8 @@ pool:
 
 variables:
   - group: AIcommerce_group # Must contain AZURE_STATIC_WEB_APPS_API_TOKEN
+  - name: VITE_API_BASE_URL
+    value: https://springbootjava-api-fncsaqdmhgf6e0hr.southindia-01.azurewebsites.net # 🔥 UPDATE THIS
 
 steps:
   - task: NodeTool@0
@@ -18,6 +20,8 @@ steps:
 
   - script: npm run build
     displayName: 'Build App'
+    env:
+      VITE_API_BASE_URL: $(VITE_API_BASE_URL) # 🔥 Inject into Vite build
 
   - script: |
       echo "Listing dist folder..."
@@ -27,7 +31,7 @@ steps:
   - task: AzureStaticWebApp@0
     displayName: 'Deploy to Azure Static Web App'
     inputs:
-      app_location: 'dist' # 🔥 SAME AS GITHUB WORKFLOW
-      output_location: '' # 🔥 MUST BE EMPTY
-      skip_app_build: true # 🔥 IMPORTANT
+      app_location: 'dist'
+      output_location: ''
+      skip_app_build: true
       azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN)
