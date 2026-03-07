@@ -6,8 +6,6 @@ pool:
 
 variables:
   - group: AIcommerce_group # Must contain AZURE_STATIC_WEB_APPS_API_TOKEN
-  - name: VITE_API_BASE_URL
-    value: https://springbootjava-api-fncsaqdmhgf6e0hr.southindia-01.azurewebsites.net # 🔥 UPDATE THIS
 
 steps:
   - task: NodeTool@0
